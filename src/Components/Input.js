@@ -1,37 +1,143 @@
 import React, { Component, useEffect, ReactDOM } from 'react';
 const { Octokit } = require("@octokit/core");
-const octokit = new Octokit({auth: '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'})
+const octokit = new Octokit({auth: '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'})
 
-
-export function ShowGists(props){
-    let toSend = []
-    toSend = props.toSend;
-    if(props.data === true){
-    console.log(toSend)
-
-    const ceva = toSend.map((gist)=>
-        <div>
-                Id:{gist.id}
-                <br/>
-                Description:{gist.description}
-                <br/>
+export function ShowFiles(props){
+    if(props.gist.files !== null){
+        
+        return(
+            <div>
                 Files:
-                  <ul>
-                    {Object.values(gist.files).map((file)=>
+                <ul >
+                    {Object.values(props.gist.files).map((file)=>
                         <li>
-                            Filename: {file.filename}   Type: {file.language} 
+                            Filename: {file.filename}
                         </li>
                     )}
-                </ul> 
-                <br/> 
-        </div>
-    )
-    //console.log(ceva)
-    return(
-        <ul>{ceva}</ul>
-      );
+                </ul>
+
+            </div>
+        )
     }else{
-        return null
+        return null;
+    }
+}
+
+export function ShowTags(props){
+    if(props.gist.tags[0] !== null){
+        
+        return(
+            <div>
+                Tags:
+                <ul>
+                    {props.gist.tags.map((tag)=>
+                        <li>
+                            {tag}
+                        </li>
+                    )}
+                </ul>
+
+            </div>
+        )
+    }else{
+        return null;
+    }
+}
+
+export function ShowDescription(props){
+    if(props.gist.description !== ""){
+        
+        return(
+            <div>
+                Description:{props.gist.description}
+            </div>
+        )
+    }else{
+        return null;
+    }
+}
+
+export class ShowForks extends Component{
+    constructor(props){
+        super(props)
+        this.state ={
+            forks: [],
+            done: false
+        }
+    }
+
+    componentDidMount(){
+        octokit.request('GET /gists/{gist_id}/forks', {
+            per_page: 3,
+            gist_id: this.props.gist.id
+        }).then((res,err)=>{
+            if(res){
+                for(let i = 0;i<res.data.length;i++){
+                    // console.log(res.data[i].owner)
+                    this.state.forks.push(res.data[i].owner.login);
+                }
+                this.setState({done: true});
+            }
+        })
+    }
+
+    render(){
+        console.log(this.state.forks)
+        if(this.state.done === true && this.state.forks.length !== 0){
+            
+            return(
+                <ul>
+                    Forks:{this.state.forks.map((name)=><li>{name}</li>)}
+                </ul>
+            )
+        }else{
+            return null;
+        }
+    }
+    
+}
+
+export class ShowGists extends Component{
+    
+    render(){
+        
+
+        if(this.props.data === true){
+            let tags = [];
+        
+            this.props.toSend.map((gist)=>{
+                tags = []
+                Object.values(gist.files).map((file)=>{
+                    if(!tags.includes(file.language)){
+                        tags.push(file.language);
+                    }
+                    return null;
+                }) 
+                gist['tags']= tags; 
+                return null;
+            })
+            const gists = this.props.toSend.map((gist)=>
+                <div>
+                        Id:{gist.id}
+                        <br/>
+                            <ShowDescription gist = {gist}/>
+                        <br/>
+                            <ShowTags gist = {gist} />
+                        <br/>
+                            <ShowFiles gist = {gist}/>
+                        <br/> 
+                        <br/>
+                            <ShowForks gist = {gist}/>
+                        <br/> 
+                </div>
+            )
+            return(
+                <ul>{gists}</ul>
+              );
+        }else{
+                return null
+            }
+            
     }
     
     
