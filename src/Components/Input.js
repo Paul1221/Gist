@@ -1,60 +1,71 @@
 import React, { Component, useEffect, ReactDOM } from 'react';
+import TableContainer from '@material-ui/core/TableContainer';
+import { TableRow, TableCell, TableHead, Table, TableBody, Box } from '@material-ui/core';
+import { spacing } from '@material-ui/system';
+
 const { Octokit } = require("@octokit/core");
-const octokit = new Octokit({auth: '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'})
+const octokit = new Octokit({auth: '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'})
 
-export function ShowFiles(props){
-    if(props.gist.files !== null){
+export class ShowFiles extends Component{
+    render(){
+        if(this.props.gist.files !== null){
         
-        return(
-            <div>
-                Files:
-                <ul >
-                    {Object.values(props.gist.files).map((file)=>
-                        <li>
-                            Filename: {file.filename}
-                        </li>
+            return(
+                <div>
+                  
+                    {Object.values(this.props.gist.files).map((file)=>
+                        <div>
+                            {file.filename}
+                        </div>
                     )}
-                </ul>
-
-            </div>
-        )
-    }else{
-        return null;
+                    
+    
+                </div>
+            )
+        }else{
+            return null;
+        }
     }
+   
 }
 
-export function ShowTags(props){
-    if(props.gist.tags[0] !== null){
+export class ShowTags extends Component{
+    render(){
+        if(this.props.gist.tags[0] !== null){
         
-        return(
-            <div>
-                Tags:
-                <ul>
-                    {props.gist.tags.map((tag)=>
-                        <li>
+            return(
+                <div>
+                
+                    {this.props.gist.tags.map((tag)=>
+                        <div>
                             {tag}
-                        </li>
+                        </div>
                     )}
-                </ul>
-
-            </div>
-        )
-    }else{
-        return null;
+                    
+    
+                </div>
+            )
+        }else{
+            return null;
+        }
     }
+    
 }
 
-export function ShowDescription(props){
-    if(props.gist.description !== ""){
+export class ShowDescription extends Component{
+    render(){
+        if(this.props.gist.description !== ""){
         
-        return(
-            <div>
-                Description:{props.gist.description}
-            </div>
-        )
-    }else{
-        return null;
+            return(
+                <div>
+                    {this.props.gist.description}
+                </div>
+            )
+        }else{
+            return null;
+        }
     }
+    
 }
 
 export class ShowForks extends Component{
@@ -86,9 +97,10 @@ export class ShowForks extends Component{
         if(this.state.done === true && this.state.forks.length !== 0){
             
             return(
-                <ul>
-                    Forks:{this.state.forks.map((name)=><li>{name}</li>)}
-                </ul>
+                <div>
+                        {this.state.forks.map((name)=><div align="center" size="small">{name}</div>)}  
+                </div>
+                
             )
         }else{
             return null;
@@ -117,22 +129,48 @@ export class ShowGists extends Component{
                 return null;
             })
             const gists = this.props.toSend.map((gist)=>
-                <div>
-                        Id:{gist.id}
-                        <br/>
-                            <ShowDescription gist = {gist}/>
-                        <br/>
-                            <ShowTags gist = {gist} />
-                        <br/>
-                            <ShowFiles gist = {gist}/>
-                        <br/> 
-                        <br/>
-                            <ShowForks gist = {gist}/>
-                        <br/> 
-                </div>
+            <TableRow>
+
+                <TableCell align="center" size="small">
+                 {gist.id}
+                </TableCell>
+
+                {/* <TableCell size="small" align="justify">
+                    <ShowDescription gist = {gist}/>
+                </TableCell> */}
+
+                <TableCell align="center" size="small">
+                    <ShowTags gist = {gist} />
+                </TableCell>
+
+                <TableCell align="center" size="small">
+                    <ShowFiles gist = {gist}/>
+                </TableCell>
+
+                <TableCell align="center" size="small">
+                    <ShowForks gist = {gist}/>
+                </TableCell>    
+            </TableRow>
             )
             return(
-                <ul>{gists}</ul>
+                <TableContainer component="Paper"  >
+                    <Table style={{width: "50%"}} aria-label="pagination table" align="center" >
+
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="center" size="small">ID</TableCell>
+                                {/* <TableCell align="left" size="small">Description</TableCell> */}
+                                <TableCell align="center" size="small">Tags</TableCell>
+                                <TableCell align="center" size="small">Files</TableCell>
+                                <TableCell align="center" size="small">Forks</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {gists} 
+                        </TableBody>
+                        
+                    </Table>
+                </TableContainer>
               );
         }else{
                 return null
@@ -182,17 +220,22 @@ export class SearchBar extends Component{
         
         return(
             <div>
-                <form onSubmit={this.handleSubmit}>
+                <Box sx={{marginTop:50, marginBottom: 50}}>
+                <form  onSubmit={this.handleSubmit} align="center" >
                     <div>
-                        <label>
-                            Username:
-                            <input id="username" type="text" />
-                        </label>
-                        <input type="submit" value="Submit" />
+                        <input style={{width: "25%", textAlign: 'center'}} size="medium" align="center" id="username"  type="text" placeholder="Username" />
+                        <div>
+                            <input align="center" type="submit" value="Get Gists" />
+                        </div>
                         
                     </div>
                 </form>
-                <ShowGists toSend={toSend} data={data} ></ShowGists>
+                </Box>
+                
+                <Box sx={{marginTop:50, marginBottom: 50}}>
+                    <ShowGists  toSend={toSend} data={data} ></ShowGists>
+                </Box>
+                
             </div>
                 
         )
